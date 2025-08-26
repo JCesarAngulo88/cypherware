@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Contact Me</h1>
+<form method="POST">
+    <label>Full Name:</label><br>
+    <input type="text" name="name" required><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br>
+
+    <label>Message:</label><br>
+    <textarea name="message" required></textarea><br>
+
+    <button type="submit">Send</button>
+</form>
+
+<p>
+    <a href="https://www.linkedin.com/in/yourlinkedin" target="_blank">LinkedIn</a> |
+    <a href="https://github.com/JulioAngulo" target="_blank">GitHub</a>
+</p>
+{% endblock %}

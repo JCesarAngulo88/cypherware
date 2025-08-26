@@ -1,0 +1,14 @@
+pycache/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+.venv/
+env/
+venv/
+myenv/
+
+.idea/
+.vscode/
