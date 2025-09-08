@@ -32,6 +32,7 @@ The design has a retro 90s / Matrix aesthetic, and it includes an introduction, 
 
 ## ⚙️ Setup & Installation
 
+
 ### 1. Clone the repository
 ```bash
     -To be define
@@ -42,8 +43,14 @@ myenv\bin\activate      # Windows
 
 pip install -r requirements.txt
 
+UNIX/LINUX
 #run
 export FLASK_APP=server.py && flask run --debug
+
+WINDOWS
+$env:FLASK_APP = "server.py"
+flask run --debug
+
 ```
 
 📌 Future Improvements
