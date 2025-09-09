@@ -16,7 +16,7 @@ function typeText(elementId, text, delay = 100, callback = null) {
 window.onload = function () {
     typeText("line1", "Follow your dreams", 120, function () {
         typeText("line2", "Software for the future", 100, function () {
-            typeText("line3", "Your idea, my purpose", 80);
+            typeText("line3", "If you can think it, we can build it", 80);
         });
     });
 };
