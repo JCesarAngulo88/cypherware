@@ -12,3 +12,4 @@ myenv/
 
 .idea/
 .vscode/
+.env

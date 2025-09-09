@@ -14,7 +14,7 @@ function typeText(elementId, text, delay = 100, callback = null) {
 
 // Run typing sequence
 window.onload = function () {
-    typeText("line1", "Cypherware", 120, function () {
+    typeText("line1", "Follow your dreams", 120, function () {
         typeText("line2", "Software for the future", 100, function () {
             typeText("line3", "Your idea, my purpose", 80);
         });

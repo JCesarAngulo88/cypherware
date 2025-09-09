@@ -1,21 +1,184 @@
 {% extends "base.html" %}
+
+{% block title %}Contact Me{% endblock %}
+
 {% block content %}
-<h1>Contact Me</h1>
-<form method="POST">
-    <label>Full Name:</label><br>
-    <input type="text" name="name" required><br>
+<div class="contact-container">
+    <div class="contact-card">
+        <h1 class="contact-title">PROJECT_INQUIRY.FORM</h1>
+        <p class="contact-subtitle">
+            I'd love to hear about your project idea. Please fill out the form below, and I'll get back to you as soon as possible.
+        </p>
 
-    <label>Email:</label><br>
-    <input type="email" name="email" required><br>
+        <!-- Flash messages for success/error alerts -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message success">{{ message }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-    <label>Message:</label><br>
-    <textarea name="message" required></textarea><br>
+        <form method="POST" class="contact-form">
+            <!-- Full Name -->
+            <div class="form-group">
+                <label for="user_name">FULL NAME *</label>
+                <input type="text" id="user_name" name="user_name" placeholder="Enter your full name" required class="form-input">
+            </div>
 
-    <button type="submit">Send</button>
-</form>
+            <!-- Email Address -->
+            <div class="form-group">
+                <label for="email_address">EMAIL ADDRESS *</label>
+                <input type="email" id="email_address" name="email_address" placeholder="your.email@domain.com" required class="form-input">
+            </div>
 
-<p>
-    <a href="https://www.linkedin.com/in/yourlinkedin" target="_blank">LinkedIn</a> |
-    <a href="https://github.com/JulioAngulo" target="_blank">GitHub</a>
-</p>
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label for="phone_number">PHONE NUMBER *</label>
+                <input type="tel" id="phone_number" name="phone_number" placeholder="+1 (555) 123-4567" required class="form-input">
+            </div>
+
+            <!-- Service Type -->
+            <div class="form-group">
+                <label for="service_type">SERVICE TYPE *</label>
+                <select id="service_type" name="service_type" required class="form-input">
+                    <option value="" disabled selected>Select service type</option>
+                    <option value="Web App">Web App</option>
+                    <option value="Android App">Android App</option>
+                    <option value="iOS App">IOs App</option>
+                    <option value="Embedded System App">Embedded System App</option>
+                    <option value="QA Services">QA Services</option>
+                </select>
+            </div>
+
+            <!-- Project Name -->
+            <div class="form-group">
+                <label for="project_name">PROJECT NAME *</label>
+                <input type="text" id="project_name" name="project_name" placeholder="Enter your project name" required class="form-input">
+            </div>
+
+            <!-- Project Description -->
+            <div class="form-group">
+                <label for="project_description">PROJECT DESCRIPTION *</label>
+                <textarea id="project_description" name="project_description" rows="5" placeholder="Describe your project requirements, goals, and any specific features you need..." required class="form-input"></textarea>
+            </div>
+
+            <button type="submit" class="submit-button">EXECUTE TRANSMISSION</button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* CSS for the Contact page */
+
+/* General container for the page */
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1rem; /* Space for the fixed nav bar */
+    padding-bottom: 2rem; /* Add some space at the bottom */
+}
+
+/* Card for the contact form */
+.contact-card {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    border: 2px solid #5ad6ff; /* Matrix green border */
+    border-radius: 10px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 0 20px #5ad6ff; /* Glowing effect */
+}
+
+.contact-title {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #5ad6ff;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.contact-subtitle {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Styles for the flash message */
+.flash-messages {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.flash-message {
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+.flash-message.success {
+    background-color: #5ad6ff;
+    color: #000;
+}
+
+/* Form layout */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-input {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #5ad6ff;
+    border-radius: 5px;
+    color: #5ad6ff;
+    padding: 0.75rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 5px #5ad6ff;
+}
+
+label {
+    color: #5ad6ff;
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Submit button */
+.submit-button {
+    background-color: #5ad6ff;
+    color: #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 1.125rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #fff;
+    box-shadow: 0 0 10px #5ad6ff;
+}
+</style>
 {% endblock %}

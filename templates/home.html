@@ -1,20 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="matrix-background">
-  <canvas id="matrix"></canvas>
-  <div class="intro-text">
-    <div class="intro-text-line">
-      <h1 id="line1"></h1>
-    </div>
-    <div class="intro-text-line">
-      <h2 id="line2"></h2>
-    </div>
-    <div class="intro-text-line">
-      <h3 id="line3"></h3>
-    </div>
-  </div>
+<div class="intro-section">
+    <h1 id="line1" class="intro-title"></h1>
+    <h2 id="line2" class="intro-subtitle"></h2>
+    <h3 id="line3" class="intro-tagline"></h3>
 </div>
 
-<script src="{{ url_for('static', filename='js/matrix.js') }}"></script>
 <script src="{{ url_for('static', filename='js/typing.js') }}"></script>
 {% endblock %}

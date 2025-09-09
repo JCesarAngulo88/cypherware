@@ -4,28 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Cypherware{% endblock %}</title>
+    <!-- Add Font Awesome for icons -->
+    <link rel="icon" href="{{ url_for('static', filename='assets/cypherware-logo.ico') }}">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script> -->
+    <link href="./static/css/style.css" rel="stylesheet"></head>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('about') }}">About Me</a></li>
-            <li><a href="{{ url_for('projects') }}">Projects</a></li>
-            <li><a href="{{ url_for('contact') }}">Contact Me</a></li>
-        </ul>
-    </nav>
-
-    <!-- Main Content -->
-    <main>
+    
+    <header>
+        <!-- <h1 class="glow">CYPHERWARE PENDING</h1> -->
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('projects') }}">Projects</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+    </header>
+    
+    <div class="container">
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
-    <!-- Footer -->
     <footer>
-        <p>&copy; 2025 My Portfolio</p>
+        &copy; {{ current_year }} Cypherware. All rights reserved.
     </footer>
+
 </body>
 </html>
