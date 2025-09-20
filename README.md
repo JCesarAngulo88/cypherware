@@ -24,6 +24,14 @@ The design has a retro 90s / Matrix aesthetic, and it includes an introduction, 
 │   ├── css/
 │   ├── js/
 │   └── images/
+├── pages/					# Class based POM 	
+│	├── base_page.py
+│	├── home_page.py
+│	├── contact_page.py
+├── tests/					# Test Methods
+│	├── conftest.py.py
+│	├── test_data.py
+│	├── test_web_home.py
 ├── requirements.txt
 ├── .gitignore
 └── README.

@@ -13,3 +13,6 @@ myenv/
 .idea/
 .vscode/
 .env
+
+main.py
+urban_routes_test.log
