@@ -1,4 +1,4 @@
-name: Full-Stack Test Suite
+name: Cypherware Full-Stack CI
 
 on:
   push:
@@ -23,37 +23,35 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools
-        pip install -r requirements.txt
+        pip install Flask Flask-SQLAlchemy selenium pytest python-dotenv
 
     - name: Start Flask Server
       env:
-        # Pointing directly to the file name is often more robust in CI
         FLASK_APP: server.py
-        FLASK_ENV: development
-        SECRET_KEY: "ci-test-key"
-        PYTHONPATH: .
+        SECRET_KEY: "ci-test-key-cypherware"
       run: |
-        # Start flask in the background
-        # We ensure the server is bound to 127.0.0.1 for local CI testing
+        # Start flask in the background using the python module flag
         python -m flask run --host=127.0.0.1 --port=5000 &
         
-        # Give the server ample time to initialize the database
+        # Wait for the server to initialize (database creation happens in conftest.py)
         sleep 10
+        
+        # Verify the server is responding before proceeding to tests
+        curl -v http://127.0.0.1:5000/api/health || (echo "Server failed to start" && exit 1)
 
     - name: Run Selenium Tests
       env:
         CI_ENVIRONMENT: "true"
-        # Matching the host used in the flask run command
         BASE_URL: "http://127.0.0.1:5000"
       run: |
+        # Run only your Cypherware web tests
         pytest tests/test_web_home.py
 
     - name: Upload Test Logs
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-logs
+        name: cypherware-test-logs
         path: |
-          *.log
+          app_test.log
           tests/*.log
