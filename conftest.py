@@ -8,20 +8,6 @@ from selenium.webdriver.chrome.options import Options
 # Create a logger instance for this module
 logger = logging.getLogger(__name__)
 
-@pytest.fixture(scope="session", autouse=True)
-def initialize_database():
-    """
-    Ensures that the database tables are created before any tests run.
-    This is especially useful for CI/CD environments.
-    """
-    from server import app, db
-    with app.app_context():
-        logger.info("Initializing database tables...")
-        db.create_all()
-    yield
-    # Optional: You could drop tables here if you want a clean slate every time
-    # but usually, for development, we leave them.
-
 @pytest.fixture(scope="class")
 def driver(request):
     """

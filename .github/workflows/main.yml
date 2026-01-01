@@ -1,0 +1,62 @@
+name: Full-Stack Test Suite
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-automation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # This installs Flask, SQLAlchemy, Selenium, and Pytest from your repo
+        pip install -r requirements.txt
+
+    - name: Start Flask Server
+      env:
+        FLASK_APP: server.py
+        # Use a consistent secret key for the CI environment
+        SECRET_KEY: "ci-test-key"
+        # If your app needs a DB URL for PostgreSQL in CI, add it here
+        # DATABASE_URL: "sqlite:///:memory:" 
+      run: |
+        # Start flask in the background (&)
+        # We use 0.0.0.0 to ensure it listens on all interfaces within the runner
+        flask run --host=0.0.0.0 --port=5000 &
+        
+        # Give the server 5 seconds to wake up and initialize the DB via conftest
+        sleep 5
+
+    - name: Run Selenium Tests
+      env:
+        # This triggers the 'is_ci' logic in your conftest.py (enabling Headless mode)
+        CI_ENVIRONMENT: "true"
+        # The tests will use this to know where the server is
+        BASE_URL: "http://127.0.0.1:5000"
+      run: |
+        # Running your home page tests
+        pytest tests/test_web_home.py
+
+    - name: Upload Test Logs
+      # This step runs even if the previous step (tests) fails
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs
+        path: |
+          tests/*.log
+          # If you implement screenshots on failure later, include them here:
+          # screenshots/*.png
