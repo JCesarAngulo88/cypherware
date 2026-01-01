@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   test-automation:
@@ -22,41 +23,36 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # This installs Flask, SQLAlchemy, Selenium, and Pytest from your repo
+        # Added setuptools which is sometimes needed for Flask discovery in CI
+        pip install setuptools
         pip install -r requirements.txt
 
     - name: Start Flask Server
       env:
-        FLASK_APP: server.py
-        # Use a consistent secret key for the CI environment
+        # Explicitly pointing to the 'app' variable inside 'server.py'
+        FLASK_APP: server:app
+        FLASK_ENV: development
         SECRET_KEY: "ci-test-key"
-        # If your app needs a DB URL for PostgreSQL in CI, add it here
-        # DATABASE_URL: "sqlite:///:memory:" 
       run: |
-        # Start flask in the background (&)
-        # We use 0.0.0.0 to ensure it listens on all interfaces within the runner
-        flask run --host=0.0.0.0 --port=5000 &
+        # Start flask in the background
+        # Using -m flask ensures we use the flask module installed in the current environment
+        python -m flask run --host=0.0.0.0 --port=5000 &
         
-        # Give the server 5 seconds to wake up and initialize the DB via conftest
-        sleep 5
+        # Increased wait time to 7 seconds to ensure DB initialization in conftest finishes
+        sleep 7
 
     - name: Run Selenium Tests
       env:
-        # This triggers the 'is_ci' logic in your conftest.py (enabling Headless mode)
         CI_ENVIRONMENT: "true"
-        # The tests will use this to know where the server is
         BASE_URL: "http://127.0.0.1:5000"
       run: |
-        # Running your home page tests
         pytest tests/test_web_home.py
 
     - name: Upload Test Logs
-      # This step runs even if the previous step (tests) fails
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: test-logs
         path: |
+          *.log
           tests/*.log
-          # If you implement screenshots on failure later, include them here:
-          # screenshots/*.png
