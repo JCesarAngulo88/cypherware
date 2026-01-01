@@ -23,7 +23,7 @@ def initialize_database():
         logger.error(f"Could not import server or db: {e}")
     yield
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def driver(request):
     """
     Initializes the WebDriver. 
