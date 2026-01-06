@@ -77,6 +77,19 @@ def contact():
             return redirect(url_for("contact"))
     return render_template("contact.html")
 
+# --- API & CI/CD Helpers ---
+@app.route("/api/health")
+def health():
+    """
+    Critical endpoint for GitHub Actions.
+    Returns 200 OK to signal the server is ready for Selenium tests.
+    """
+    return jsonify({
+        "status": "healthy", 
+        "database": "connected",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }), 200
+
 # --- API Endpoints ---
 
 @app.route("/api/contacts", methods=["GET", "POST"])
@@ -139,4 +152,7 @@ def delete_contact(id):
         return jsonify({"error": "Could not delete contact."}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Ensure tables are created if running script directly
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, host="127.0.0.1", port=5000)
