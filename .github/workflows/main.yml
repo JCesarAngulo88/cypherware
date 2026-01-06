@@ -27,6 +27,7 @@ jobs:
 
     - name: Start Flask Server
       env:
+        PYTHONPATH: ${{ github.workspace }}
         FLASK_APP: server.py
         SECRET_KEY: "ci-test-key-cypherware"
       run: |
