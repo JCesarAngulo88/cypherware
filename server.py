@@ -6,10 +6,8 @@ import os
 app = Flask(__name__)
 
 # --- Configuration ---
-# Use a local SQLite database file named 'cypherware.db'
-# In CI, this will be created fresh in the runner's workspace
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'cypherware.db')
+LOCAL_POSTGRES_DB = "postgresql://jcesar@localhost:5432/cypherware_db"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', LOCAL_POSTGRES_DB)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-cipher-123')
 
@@ -17,6 +15,8 @@ db = SQLAlchemy(app)
 
 # --- Database Models ---
 class Contact(db.Model):
+    """Model to store contact form submissions in PostgreSQL."""
+    __tablename__ = 'contact' # Matches the table name in your 'psql' output
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(30), nullable=False)
     email_address = db.Column(db.String(30), nullable=False)
@@ -155,4 +155,5 @@ if __name__ == "__main__":
     # Ensure tables are created if running script directly
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    # Port 5001 prevents macOS AirPlay conflict on 5000
+    app.run(debug=True, host="127.0.0.1", port=5001)

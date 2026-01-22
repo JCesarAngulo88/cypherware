@@ -11,6 +11,23 @@ jobs:
   test-automation:
     runs-on: ubuntu-latest
 
+    # Service containers to run with this job
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: cypherware_db
+          POSTGRES_USER: jcesar
+          POSTGRES_PASSWORD: password123 # CI specific password
+        ports:
+          - 5432:5432
+        # Wait for postgres to be ready before starting steps
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -23,27 +40,29 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install Flask Flask-SQLAlchemy selenium pytest python-dotenv
+        pip install Flask Flask-SQLAlchemy psycopg2-binary selenium pytest
 
     - name: Start Flask Server
       env:
         PYTHONPATH: ${{ github.workspace }}
         FLASK_APP: server.py
+        # Pointing to the Postgres service container defined above
+        DATABASE_URL: "postgresql://jcesar:password123@localhost:5432/cypherware_db"
         SECRET_KEY: "ci-test-key-cypherware"
       run: |
-        # Start flask in the background using the python module flag
-        python -m flask run --host=127.0.0.1 --port=5000 &
+        # Start server in background on port 5001
+        flask run --host=127.0.0.1 --port=5001 &
         
-        # Wait for the server to initialize (database creation happens in conftest.py)
+        # Wait for initialization
         sleep 10
         
-        # Verify the server is responding before proceeding to tests
-        curl -v http://127.0.0.1:5000/api/health || (echo "Server failed to start" && exit 1)
+        # Verify readiness on port 5001
+        curl -v http://127.0.0.1:5001/api/health || (echo "Server failed to start" && exit 1)
 
     - name: Run Selenium Tests
       env:
         CI_ENVIRONMENT: "true"
-        BASE_URL: "http://127.0.0.1:5000"
+        BASE_URL: "http://127.0.0.1:5001"
       run: |
         # Run only your Cypherware web tests
         pytest tests/test_web_home.py
