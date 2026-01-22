@@ -6,8 +6,11 @@ import os
 app = Flask(__name__)
 
 # --- Configuration ---
-LOCAL_POSTGRES_DB = "postgresql://jcesar@localhost:5432/cypherware_db"
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', LOCAL_POSTGRES_DB)
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    # Local fallback for jcesar@localhost (No password usually needed for local socket)
+    DATABASE_URL = "postgresql://jcesar@localhost:5432/cypherware_db"
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-cipher-123')
 

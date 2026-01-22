@@ -1,4 +1,4 @@
-name: Cypherware Full-Stack CI
+name: Full-Stack Test Suite (PostgreSQL) CI
 
 on:
   push:
@@ -11,17 +11,15 @@ jobs:
   test-automation:
     runs-on: ubuntu-latest
 
-    # Service containers to run with this job
     services:
       postgres:
         image: postgres:15
         env:
           POSTGRES_DB: cypherware_db
           POSTGRES_USER: jcesar
-          POSTGRES_PASSWORD: password123 # CI specific password
+          POSTGRES_PASSWORD: password123 
         ports:
           - 5432:5432
-        # Wait for postgres to be ready before starting steps
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -46,32 +44,28 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
         FLASK_APP: server.py
-        # Pointing to the Postgres service container defined above
-        DATABASE_URL: "postgresql://jcesar:password123@localhost:5432/cypherware_db"
+        # Explicitly passing the connection string to the env
+        DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
         SECRET_KEY: "ci-test-key-cypherware"
       run: |
-        # Start server in background on port 5001
         flask run --host=127.0.0.1 --port=5001 &
-        
-        # Wait for initialization
         sleep 10
-        
-        # Verify readiness on port 5001
         curl -v http://127.0.0.1:5001/api/health || (echo "Server failed to start" && exit 1)
 
     - name: Run Selenium Tests
       env:
         CI_ENVIRONMENT: "true"
+        # The test runner ALSO needs the DATABASE_URL to initialize the DB in conftest.py
+        DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
         BASE_URL: "http://127.0.0.1:5001"
       run: |
-        # Run only your Cypherware web tests
         pytest tests/test_web_home.py
 
     - name: Upload Test Logs
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: cypherware-test-logs
+        name: test-logs
         path: |
           app_test.log
           tests/*.log
