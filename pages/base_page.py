@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class BasePage:
-    def __init__(self, driver, base_url="http://127.0.0.1:5000"):
+    def __init__(self, driver, base_url="http://127.0.0.1:5001"):
         self.driver = driver
         self.base_url = base_url
         self.wait = WebDriverWait(driver, 30)

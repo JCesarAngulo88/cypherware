@@ -6,13 +6,23 @@ import os
 app = Flask(__name__)
 
 # --- Configuration ---
-DATABASE_URL = os.getenv('DATABASE_URL')
-if not DATABASE_URL:
+# 1. Retrieve the Database URL from the environment
+raw_db_url = os.getenv('DATABASE_URL')
+
+# 2. Logic to handle SQLAlchemy 1.4+ requirement (postgresql:// vs postgres://)
+if raw_db_url:
+    if raw_db_url.startswith("postgres://"):
+        DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
+    else:
+        DATABASE_URL = raw_db_url
+else:
     # Local fallback for jcesar@localhost (No password usually needed for local socket)
     DATABASE_URL = "postgresql://jcesar@localhost:5432/cypherware_db"
+
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-cipher-123')
+
 
 db = SQLAlchemy(app)
 
@@ -60,23 +70,25 @@ def projects():
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
-        user_name = request.form["user_name"]
-        email_address = request.form["email_address"]
-        phone_number = request.form["phone_number"]
-        service_type = request.form["service_type"]
-        project_name = request.form["project_name"]
-        project_description = request.form["project_description"]
-
-        new_msg = Contact(user_name=user_name, email_address=email_address, phone_number=phone_number, service_type=service_type, project_name=project_name, project_description=project_description)
         try:
+            # EXTRACTING ALL FIELDS FROM THE UPDATED HTML FORM
+            new_msg = Contact(
+                user_name=request.form.get("user_name"),
+                email_address=request.form.get("email_address"),
+                phone_number=request.form.get("phone_number"),
+                service_type=request.form.get("service_type"),
+                project_name=request.form.get("project_name"),
+                project_description=request.form.get("project_description")
+            )
             db.session.add(new_msg)
             db.session.commit()
-            flash("Thanks for contacting me! I'll get back to you soon.")
+            flash("Message sent successfully!")
             return redirect(url_for("contact"))
         except Exception as e:
             db.session.rollback()
-            flash("An error occurred. Please try again.")
-            print(f"Error: {e}")
+            # This will print the exact SQL error (e.g., column missing) to your terminal
+            print(f"PostgreSQL Insert Error: {e}")
+            flash("Error sending message.")
             return redirect(url_for("contact"))
     return render_template("contact.html")
 

@@ -1,12 +1,20 @@
 import pytest
 import logging
 import os
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
 # Create a logger instance for this module
 logger = logging.getLogger(__name__)
+
+# --- Path Configuration ---
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
+
+def pytest_configure(config):
+    sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_database():
@@ -16,11 +24,19 @@ def initialize_database():
     """
     try:
         from server import app, db
+        # Debugging: Log the connection URI being used (masking sensitive parts)
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', 'NOT SET')
+        logger.info(
+            f"Connecting to database for initialization: {db_uri.split('@')[-1] if '@' in db_uri else 'Local/No Pass'}")
+
         with app.app_context():
             logger.info("Initializing Cypherware database tables...")
             db.create_all()
+            logger.info("Database tables initialized successfully.")
     except ImportError as e:
         logger.error(f"Could not import server or db: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error during database initialization: {e}")
     yield
 
 @pytest.fixture(scope="function")
@@ -35,17 +51,15 @@ def driver(request):
     is_ci = os.getenv("CI_ENVIRONMENT") == "true" or os.getenv("GITHUB_ACTIONS") == "true"
 
     if is_ci:
-        logger.info("Running in CI environment: Enabling headless mode.")
+        logger.info("CI detected: Enabling Headless Chrome.")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--window-size=1920,1080")
-        # System path handles ChromeDriver in GitHub runners
         service = Service()
     else:
-        logger.info("Running in local environment.")
+        logger.info("Local environment: Enabling Headed Chrome.")
         chrome_options.add_argument("--start-maximized")
-        # Try to import local path from config.py
         try:
             from config import DRIVER_PATH
             service = Service(DRIVER_PATH)
@@ -54,8 +68,7 @@ def driver(request):
             service = Service()
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    
-    # Attach driver to the class so tests can access self.driver
+
     if request.cls is not None:
         request.cls.driver = driver
         
@@ -92,4 +105,4 @@ def setup_logger():
 @pytest.fixture
 def base_url():
     """Returns the URL of the running Flask server."""
-    return os.getenv("BASE_URL", "http://127.0.0.1:5000")
+    return os.getenv("BASE_URL", "http://127.0.0.1:5001")
