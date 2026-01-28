@@ -24,25 +24,46 @@
             <!-- Full Name -->
             <div class="form-group">
                 <label for="user_name">FULL NAME *</label>
-                <input type="text" id="user_name" name="user_name" placeholder="Enter your full name" required class="form-input">
+                <input type="text"
+                       id="user_name"
+                       name="user_name"
+                       placeholder="Enter your full name"
+                       required
+                       class="form-input"
+                       oninvalid="this.setCustomValidity('Please enter a valid name to proceed')"
+                       oninput="this.setCustomValidity('')">
             </div>
 
             <!-- Email Address -->
             <div class="form-group">
                 <label for="email_address">EMAIL ADDRESS *</label>
-                <input type="email" id="email_address" name="email_address" placeholder="your.email@domain.com" required class="form-input">
+                <input type="email"
+                       id="email_address"
+                       name="email_address"
+                       placeholder="your.email@domain.com"
+                       required
+                       class="form-input"
+                       oninvalid="this.setCustomValidity('Please enter a valid email address to proceed')"
+                       oninput="this.setCustomValidity('')">
             </div>
 
             <!-- Phone Number -->
             <div class="form-group">
                 <label for="phone_number">PHONE NUMBER *</label>
-                <input type="tel" id="phone_number" name="phone_number" placeholder="+1 (555) 123-4567" required class="form-input">
+                <input type="tel"
+                       id="phone_number"
+                       name="phone_number"
+                       placeholder="+1 (555) 123-4567"
+                       required
+                       class="form-input"
+                       oninvalid="this.setCustomValidity('Please enter a phone number address to proceed')"
+                       oninput="this.setCustomValidity('')">
             </div>
 
             <!-- Service Type -->
             <div class="form-group">
                 <label for="service_type">SERVICE TYPE *</label>
-                <select id="service_type" name="service_type" required class="form-input">
+                <select id="service_type" name="service_type" required class="form-input" oninvalid="this.setCustomValidity('Please, Select a Service')" oninput="this.setCustomValidity('')">
                     <option value="" disabled selected>Select service type</option>
                     <option value="Web App">Web App</option>
                     <option value="Android App">Android App</option>
@@ -55,13 +76,27 @@
             <!-- Project Name -->
             <div class="form-group">
                 <label for="project_name">PROJECT NAME *</label>
-                <input type="text" id="project_name" name="project_name" placeholder="Enter your project name" required class="form-input">
+                <input type="text"
+                       id="project_name"
+                       name="project_name"
+                       placeholder="Enter your project name"
+                       required
+                       class="form-input"
+                       oninvalid="this.setCustomValidity('Please enter a project name address to proceed')"
+                       oninput="this.setCustomValidity('')">
             </div>
 
             <!-- Project Description -->
             <div class="form-group">
                 <label for="project_description">PROJECT DESCRIPTION *</label>
-                <textarea id="project_description" name="project_description" rows="5" placeholder="Describe your project requirements, goals, and any specific features you need..." required class="form-input"></textarea>
+                <textarea id="project_description"
+                          name="project_description"
+                          rows="5"
+                          placeholder="Describe your project requirements, goals, and any specific features you need..."
+                          required
+                          class="form-input"
+                          oninvalid="this.setCustomValidity('Please enter a valid project description to proceed')"
+                          oninput="this.setCustomValidity('')"></textarea>
             </div>
 
             <button type="submit" class="submit-button">EXECUTE TRANSMISSION</button>
@@ -78,19 +113,19 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-top: 1rem; /* Space for the fixed nav bar */
-    padding-bottom: 2rem; /* Add some space at the bottom */
+    padding-top: 1rem;
+    padding-bottom: 2rem;
 }
 
 /* Card for the contact form */
 .contact-card {
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
-    border: 2px solid #5ad6ff; /* Matrix green border */
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #5ad6ff;
     border-radius: 10px;
     padding: 2.5rem;
     width: 100%;
     max-width: 500px;
-    box-shadow: 0 0 20px #5ad6ff; /* Glowing effect */
+    box-shadow: 0 0 20px #5ad6ff;
 }
 
 .contact-title {
@@ -147,12 +182,35 @@
     color: #5ad6ff;
     padding: 0.75rem;
     font-family: 'Courier New', Courier, monospace;
+    /* Added transition to base to smooth out any sudden style changes */
+    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
 }
 
 .form-input:focus {
     outline: none;
     border-color: #fff;
     box-shadow: 0 0 5px #5ad6ff;
+}
+
+/* Use transition and inset box-shadow to override the white background */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-input:-webkit-autofill:active {
+    -webkit-text-fill-color: #5ad6ff !important;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 0px 1000px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* The Invalid State: Turns red ONLY when focused and invalid */
+.form-input:focus:invalid {
+    border-color: #ff4d4d;
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+}
+
+/* The Valid State */
+.form-input:focus:valid {
+    border-color: #2ecc71;
 }
 
 label {

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
+from helpers.contact_validations import *
 import os
 
 app = Flask(__name__)
@@ -22,8 +23,6 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-cipher-123')
-
-
 db = SQLAlchemy(app)
 
 # --- Database Models ---
@@ -33,7 +32,7 @@ class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(30), nullable=False)
     email_address = db.Column(db.String(30), nullable=False)
-    phone_number = db.Column(db.String(20), nullable=False)
+    phone_number = db.Column(db.String(12), nullable=False)
     service_type = db.Column(db.String(30), nullable=False)
     project_name = db.Column(db.String(50), nullable=False)
     project_description = db.Column(db.Text, nullable=False)
@@ -70,6 +69,38 @@ def projects():
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
     if request.method == "POST":
+        # Perform Server-Side Validation
+        is_valid_name, error_message_name = validate_full_name(request.form.get("user_name", ""))
+        is_valid_email, error_message_email = validate_email(request.form.get("email_address", ""))
+        is_valid_phone, error_message_phone = validate_phone(request.form.get("phone_number", ""))
+        """is_valid_service_type, error_message_error_type = validate_service_type_selector(request.form.get("service_type", ""))"""
+        is_valid_project_name, error_message_error_project_name = validate_project_name(request.form.get("project_name", ""))
+        is_valid_project_description, error_message_project_description = validate_project_description(request.form.get("project_description", ""))
+
+        if not is_valid_name:
+            flash(error_message_name)
+            return redirect(url_for("contact"))
+
+        if not is_valid_email:
+            flash(error_message_email)
+            return redirect(url_for("contact"))
+
+        if not is_valid_phone:
+            flash(error_message_phone)
+            return redirect(url_for("contact"))
+
+        """if not is_valid_service_type:
+            flash(error_message_error_type)
+            return redirect(url_for("contact"))"""
+
+        if not is_valid_project_name:
+            flash(error_message_error_project_name)
+            return redirect(url_for("contact"))
+
+        if not is_valid_project_description:
+            flash(error_message_project_description)
+            return redirect(url_for("contact"))
+
         try:
             # EXTRACTING ALL FIELDS FROM THE UPDATED HTML FORM
             new_msg = Contact(
