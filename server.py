@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from helpers.contact_validations import *
 import os
+import jwt
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -53,6 +55,31 @@ class Contact(db.Model):
             "project_description": self.project_description,
             "created_at": self.created_at.isoformat()
         }
+
+# --- Auth Decorator ---
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        # Look for 'Authorization: Bearer <token>'
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                token = auth_header.split(" ")[1]
+            except IndexError:
+                return jsonify({"error": "Token is missing"}), 401
+
+        if not token:
+            return jsonify({"error": "Token is missing"}), 401
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            # You could add a user lookup here: current_user = User.query.get(data['user_id'])
+        except Exception as e:
+            return jsonify({"error": "Token is invalid or expired"}), 401
+
+        return f(*args, **kwargs)
+    return decorated
 
 @app.route("/")
 def home():
@@ -133,6 +160,36 @@ def health():
     }), 200
 
 # --- API Endpoints ---
+@app.route("/api/login", methods=["POST"])
+def login():
+    auth = request.json
+    if not auth or not auth.get('email') or not auth.get('password'):
+        return jsonify({"error": "Could not verify"}), 401
+
+    # MOCK LOGIN: In a real app, check against hashed password in DB
+    if auth.get('email') == "admin@cypherware.com" and auth.get('password') == "password123":
+        token = jwt.encode({
+            'user': auth.get('email'),
+            'exp': datetime.now(timezone.utc) + timedelta(hours=2)
+        }, app.config['SECRET_KEY'], algorithm="HS256")
+
+        return jsonify({'token': token})
+
+    return jsonify({"error": "Invalid credentials"}), 401
+
+@app.route("/api/contacts", methods=["GET"])
+@token_required
+def get_contacts():
+    contacts = Contact.query.all()
+    output = []
+    for c in contacts:
+        output.append({
+            "id": c.id,
+            "user_name": c.user_name,
+            "email_address": c.email_address,
+            "service_type": c.service_type
+        })
+    return jsonify(output)
 
 @app.route("/api/contacts", methods=["GET", "POST"])
 def manage_contacts():

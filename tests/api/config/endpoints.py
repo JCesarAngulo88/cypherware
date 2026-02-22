@@ -2,8 +2,8 @@ class Endpoints:
     """API test_endpoints configuration"""
 
     # Auth test_endpoints
-    LOGIN = "/auth/login" # TODO:
-    LOGOUT = "/auth/logout" # TODO:
+    LOGIN = "/api/login"
+    LOGOUT = "/api/logout" # TODO:
     REFRESH_TOKEN = "/auth/refresh" # TODO:
 
     # User test_endpoints

@@ -14,11 +14,12 @@ class TestContact:
     """
 
     @pytest.mark.debug
-    def test_contact_get_all_contacts(self, api_client):
+    def test_contact_get_all_contacts(self, authenticated_client):
         """
         Verifies endpoint: Get all contacts saved.
         """
-        response = api_client.get(Endpoints.CONTACTS)
+        #response = api_client.get(Endpoints.CONTACTS)
+        response = authenticated_client.get(Endpoints.CONTACTS)
 
         assert response.status_code == 200, f"\nFail. Expected 200 but got {response.status_code}"
         logger.info(f"\nPass. Expected code: 200. API Response: {response.status_code}")
@@ -27,7 +28,7 @@ class TestContact:
         response_json = response.json()
         logger.info(f"\nPass. Expected data: {response_json}")
 
-    @pytest.mark.debug
+    @pytest.mark.smoke
     @pytest.mark.parametrize("id_contact", "1")
     def test_contact_get_contact_id(self, api_client, id_contact):
         """
