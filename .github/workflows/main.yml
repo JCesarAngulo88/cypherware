@@ -38,7 +38,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install Flask Flask-SQLAlchemy psycopg2-binary selenium pytest PyJWT
+        pip install Flask Flask-SQLAlchemy psycopg2-binary selenium pytest requests PyJWT
 
     - name: Start Flask Server
       env:
