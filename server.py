@@ -73,7 +73,6 @@ def contact():
         is_valid_name, error_message_name = validate_full_name(request.form.get("user_name", ""))
         is_valid_email, error_message_email = validate_email(request.form.get("email_address", ""))
         is_valid_phone, error_message_phone = validate_phone(request.form.get("phone_number", ""))
-        """is_valid_service_type, error_message_error_type = validate_service_type_selector(request.form.get("service_type", ""))"""
         is_valid_project_name, error_message_error_project_name = validate_project_name(request.form.get("project_name", ""))
         is_valid_project_description, error_message_project_description = validate_project_description(request.form.get("project_description", ""))
 
@@ -88,10 +87,6 @@ def contact():
         if not is_valid_phone:
             flash(error_message_phone)
             return redirect(url_for("contact"))
-
-        """if not is_valid_service_type:
-            flash(error_message_error_type)
-            return redirect(url_for("contact"))"""
 
         if not is_valid_project_name:
             flash(error_message_error_project_name)
@@ -124,6 +119,7 @@ def contact():
     return render_template("contact.html")
 
 # --- API & CI/CD Helpers ---
+
 @app.route("/api/health")
 def health():
     """
@@ -131,7 +127,7 @@ def health():
     Returns 200 OK to signal the server is ready for Selenium tests.
     """
     return jsonify({
-        "status": "healthy", 
+        "status": "healthy",
         "database": "connected",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }), 200

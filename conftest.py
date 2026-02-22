@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 def pytest_configure(config):
     sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
+# --- WEB & DB FIXTURES ---
 @pytest.fixture(scope="session", autouse=True)
 def initialize_database():
     """
@@ -106,3 +107,52 @@ def setup_logger():
 def base_url():
     """Returns the URL of the running Flask server."""
     return os.getenv("BASE_URL", "http://127.0.0.1:5001")
+
+# --- API Fixtures
+import pytest
+from typing import Any, Generator
+from tests.api.api_utils.api_client import APIClient
+
+@pytest.fixture(scope="session")
+def api_client() -> Generator[APIClient, None, None]:
+    """Fixture to provide API client for all tests"""
+    client = APIClient()
+    yield client
+    # Cleanup if needed
+    client.session.close()
+
+@pytest.fixture(scope="function")
+def authenticated_client(api_client: APIClient) -> APIClient:
+    """Fixture to provide authenticated API client"""
+    api_client.login()
+    return api_client
+
+@pytest.fixture(scope="function")
+def test_user_data() -> dict[str, Any]:
+    """Fixture to provide test user data"""
+    return {
+        "name": "Test User",
+        "email": "test.user@example.com",
+        "password": "TestPass123!",
+        "role": "user"
+    }
+
+@pytest.fixture(scope="function")
+def cleanup_test_user(api_client: APIClient):
+    """Fixture to clean up test users after tests"""
+    user_ids = []
+    yield user_ids
+
+    # Cleanup created users
+    for user_id in user_ids:
+        try:
+            api_client.delete(f"/users/{user_id}")
+            logger.info(f"Cleaned up test user: {user_id}")
+        except:
+            logger.warning(f"Failed to cleanup user: {user_id}")
+
+@pytest.fixture(scope="function")
+def authenticated_client(api_client):
+    """Fixture to provide an API client that has already executed login()"""
+    api_client.login() # This calls the login method in your APIClient class
+    return api_client
