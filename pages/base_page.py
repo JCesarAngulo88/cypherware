@@ -43,7 +43,9 @@ class BasePage:
 
     def get_text(self, locator, expected_text: str = None):
         try:
-            return self.find(locator, expected_text).text
+            fname = self.find(locator, expected_text).text
+            logger.debug(f"Found text {fname}")
+            return fname
         except Exception as e:
             logger.error(f"Error getting text from element {locator}: {e}")
             return None
@@ -71,3 +73,14 @@ class BasePage:
         return WebDriverWait(self.driver, timeout).until(
             EC.invisibility_of_element_located(locator)
         )
+
+    #def get_input_name(self, locator) -> str:
+        #return self.find(locator).text
+
+    def get_input_value(self, locator) -> str:
+        """
+        Gets input value from locator
+        :param locator:
+        :return: String field
+        """
+        return self.driver.find_element(*locator).get_attribute("value")

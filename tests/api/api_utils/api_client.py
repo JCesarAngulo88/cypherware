@@ -34,9 +34,6 @@ class APIClient:
             if response.status_code == 200:
                 data = response.json()
                 self.token = data.get("token")
-
-                # CRITICAL UPDATE:
-                # We update the session headers. Now, every subsequent request
                 # (GET, POST, DELETE) will automatically include this token.
                 self.session.headers.update({
                     "Authorization": f"Bearer {self.token}"

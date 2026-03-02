@@ -122,6 +122,15 @@ def api_client() -> Generator[APIClient, None, None]:
     client.session.close()
 
 @pytest.fixture(scope="function")
+def authenticated_client(api_client):
+    """
+    Fixture to provide an authenticated API client for a specific test.
+    It calls the login() method defined to attach the JWT token to the session headers.
+    """
+    api_client.login(email="admin@cypherware.com", password="password123")
+    return api_client
+
+@pytest.fixture(scope="function")
 def test_user_data() -> dict[str, Any]:
     """Fixture to provide test user data"""
     return {
@@ -144,14 +153,3 @@ def cleanup_test_user(api_client: APIClient):
             logger.info(f"Cleaned up test user: {user_id}")
         except:
             logger.warning(f"Failed to cleanup user: {user_id}")
-
-@pytest.fixture(scope="function")
-def authenticated_client(api_client):
-    """
-    Fixture to provide an authenticated API client for a specific test.
-    It calls the login() method defined in the Canvas to attach the
-    JWT token to the session headers.
-    """
-    # The login method updates api_client.session.headers with the Bearer token
-    api_client.login(email="admin@cypherware.com", password="password123")
-    return api_client

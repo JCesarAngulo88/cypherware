@@ -1,11 +1,8 @@
 #pytest -v -s -m debug tests/test_web_home.py
 import pytest
-import pytest
 import time
-from tests.test_data import *
-from tests.tests_helper import *
+from tests.web.home.test_data_home import *
 from pages.home_page import HomePage
-from pages.contact_page import ContactPage
 
 import logging
 logger = logging.getLogger(__name__)
