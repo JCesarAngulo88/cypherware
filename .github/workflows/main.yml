@@ -59,7 +59,7 @@ jobs:
         DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
         BASE_URL: "http://127.0.0.1:5001"
       run: |
-        pytest tests/test_web_home.py
+        pytest tests/web/home/test_web_home.py
 
     - name: Upload Test Logs
       if: always()
