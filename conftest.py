@@ -127,7 +127,13 @@ def authenticated_client(api_client):
     Fixture to provide an authenticated API client for a specific test.
     It calls the login() method defined to attach the JWT token to the session headers.
     """
-    api_client.login(email="admin@cypherware.com", password="password123")
+    email = os.getenv("ADMIN_EMAIL")
+    password = os.getenv("ADMIN_PASSWORD")
+    # Fail fast if credentials are missing
+    if not email or not password:
+        pytest.fail("ADMIN_EMAIL or ADMIN_PASSWORD not set in environment")
+
+    api_client.login(email=email, password=password)
     return api_client
 
 @pytest.fixture(scope="function")

@@ -62,7 +62,7 @@ class TestContact:
         logger.info(f"\nPass. Expected data: {response_json}")
 
     @pytest.mark.debug
-    @pytest.mark.parametrize("id_contact", "1")
+    #@pytest.mark.parametrize("id_contact", "1")
     def test_database(self, authenticated_client):
         """
         Verifies endpoint: Get all contacts saved.

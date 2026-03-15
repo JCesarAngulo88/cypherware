@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_DB: cypherware_db
           POSTGRES_USER: jcesar
-          POSTGRES_PASSWORD: password123 
+          POSTGRES_PASSWORD: password123
         ports:
           - 5432:5432
         options: >-
@@ -44,22 +44,32 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
         FLASK_APP: server.py
-        # Explicitly passing the connection string to the env
         DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
-        SECRET_KEY: "ci-test-key-cypherware"
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
+        # Initialize the database schema before starting the server
+        python -c "from server import app, db; app.app_context().push(); db.create_all()"
         flask run --host=127.0.0.1 --port=5001 &
         sleep 10
         curl -v http://127.0.0.1:5001/api/health || (echo "Server failed to start" && exit 1)
 
-    - name: Run Selenium Tests
+    - name: Run Web Tests (Selenium)
       env:
         CI_ENVIRONMENT: "true"
-        # The test runner ALSO needs the DATABASE_URL to initialize the DB in conftest.py
         DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
         BASE_URL: "http://127.0.0.1:5001"
       run: |
         pytest tests/web/home/test_web_home.py
+
+    - name: Run API Smoke Tests
+      env:
+        CI_ENVIRONMENT: "true"
+        DATABASE_URL: postgresql://jcesar:password123@localhost:5432/cypherware_db
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      run: |
+        pytest tests/api/test_endpoints/test_contact/test_contact.py -m smoke
 
     - name: Upload Test Logs
       if: always()
@@ -68,4 +78,4 @@ jobs:
         name: test-logs
         path: |
           app_test.log
-          tests/*.log
+          tests/**/*.log
