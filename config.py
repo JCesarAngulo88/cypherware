@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv # Updated for windows
 
 DRIVER_PATH = "/Users/jcesar/projects/cypherware-webapp/myenv/chromedriver"
 

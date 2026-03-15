@@ -47,7 +47,7 @@ The design has a retro 90s / Matrix aesthetic, and it includes an introduction, 
 
 python3 -m venv myenv
 source myenv/bin/activate   # macOS/Linux
-myenv\bin\activate      # Windows
+.\.venv\Scripts\activate     # Windows
 
 pip install -r requirements.txt
 

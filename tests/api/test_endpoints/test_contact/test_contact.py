@@ -13,7 +13,7 @@ class TestContact:
         CONTACTS_BY_ID = "/api/contacts/{id}"
     """
 
-    @pytest.mark.debug
+    @pytest.mark.smoke
     def test_contact_get_all_contacts(self, authenticated_client):
         """
         Verifies endpoint: Get all contacts saved.
@@ -60,3 +60,37 @@ class TestContact:
         # Get data json
         response_json = response.json()
         logger.info(f"\nPass. Expected data: {response_json}")
+
+    @pytest.mark.debug
+    @pytest.mark.parametrize("id_contact", "1")
+    def test_database(self, authenticated_client):
+        """
+        Verifies endpoint: Get all contacts saved.
+        """
+        name_test = 'Cesar Tejeda'
+
+        start_time = time.time()
+        response = authenticated_client.post(Endpoints.CONTACTS)
+        end_time = time.time()
+
+        from server import app, db, Contact  # Import your app and model
+
+        with app.app_context():
+            # Fetch all records
+            contacts = Contact.query.all()
+
+            print(f"\n\n{'ID':<4} | {'Name':<20} | {'Email':<25}")
+            print("-" * 55)
+
+            for c in contacts:
+                print(f"\n\n{c.id:<4} | {c.user_name:<20} | {c.email_address:<25}")
+
+        with app.app_context():
+            # Use a list comprehension to pull only the names
+            contact_names = [c.user_name for c in Contact.query.all()]
+
+            print("List of Contact Names:")
+            print(contact_names)
+            assert name_test in contact_names, f"\nFail. Expected {name_test} but got {name_test}"
+            logger.info(f"\nPass. Expected name {name_test} DB Response: {contact_names}")
+
