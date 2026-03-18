@@ -16,7 +16,7 @@ class APIClient:
         self.token = None
         self.session.headers.update(Config.DEFAULT_HEADERS)
 
-    def login(self, email="admin@cypherware.com", password="password123"):
+    def login(self, email, password):
         """
         Performs authentication against the /api/login endpoint.
         If successful, it updates the session headers with the JWT token.
@@ -77,7 +77,21 @@ class APIClient:
         return self._request("GET", endpoint, params=params, **kwargs)
 
     def post(self, endpoint: str, data: Optional[Dict] = None, json: Optional[Dict] = None, **kwargs):
-        return self._request("POST", endpoint, data=data, json=json, **kwargs)
+        # 1. Pull 'raise_error' out of kwargs so it doesn't go to the session
+        # Set the default to True so Happy Path tests still fail if there's an error
+        raise_error = kwargs.pop('raise_error', True)
+
+        url = f"{self.base_url}{endpoint}"
+        print(f"Making POST request to {url}")
+
+        # 2. Make the actual request (passing remaining kwargs like headers/timeout)
+        response = self.session.post(url, json=json, **kwargs)
+
+        # 3. Handle the error raising logic here
+        if raise_error:
+            response.raise_for_status()
+
+        return response
 
     def put(self, endpoint: str, data: Optional[Dict] = None, json: Optional[Dict] = None, **kwargs):
         return self._request("PUT", endpoint, data=data, json=json, **kwargs)

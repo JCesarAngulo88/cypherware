@@ -177,6 +177,7 @@ def login():
 
     return jsonify({"error": "Invalid credentials"}), 401
 
+"""
 @app.route("/api/contacts", methods=["GET"])
 @token_required
 def get_contacts():
@@ -189,48 +190,67 @@ def get_contacts():
             "email_address": c.email_address,
             "service_type": c.service_type
         })
-    return jsonify(output)
+    return jsonify(output)"""
 
 @app.route("/api/contacts", methods=["GET", "POST"])
+@token_required
 def manage_contacts():
     """
     Handles GET requests to list all contacts and POST requests to create a new contact.
     """
     if request.method == "POST":
-        # Create a new contact from JSON data
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "Request must be JSON"}), 400
 
-        required_fields = ["user_name", "email_address", "phone_number", "service_type", "project_name", "project_description"]
-        if not all(field in data for field in required_fields):
-            return jsonify({"error": "Missing required fields"}), 400
-
-        new_contact = Contact(
-            user_name=data["user_name"],
-            email_address=data["email_address"],
-            phone_number=data["phone_number"],
-            service_type=data["service_type"],
-            project_name=data["project_name"],
-            project_description=data["project_description"]
-        )
-        
         try:
+
+            if not request.is_json:
+                return jsonify(
+                    {"error": "Unsupported Media Type", "message": "Content-Type must be application/json"}), 415
+
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "Request must be JSON"}), 400
+
+            # Define the allowed options (must match your frontend values)
+            ALLOWED_SERVICES = ["Web App", "Android App", "iOS App", "Embedded System App", "QA Services"]
+            # 3. Field & Validation Checks
+            required_fields = ["user_name", "email_address", "phone_number", "service_type", "project_name",
+                               "project_description"]
+            missing_fields = [f for f in required_fields if f not in data]
+            if missing_fields:
+                return jsonify({"error": "Missing fields", "message": f"Missing: {', '.join(missing_fields)}"}), 400
+
+            if "@" not in data["email_address"]:
+                return jsonify({"error": "Unprocessable Entity", "message": "Invalid email format"}), 422
+
+            if data.get("service_type") not in ALLOWED_SERVICES:
+                return jsonify({
+                    "error": "Bad Request",
+                    "message": f"Invalid service type. Must be one of: {', '.join(ALLOWED_SERVICES)}"
+                }), 400
+
+            new_contact = Contact(
+                user_name=data["user_name"],
+                email_address=data["email_address"],
+                phone_number=data["phone_number"],
+                service_type=data["service_type"],
+                project_name=data["project_name"],
+                project_description=data["project_description"]
+            )
+        
             db.session.add(new_contact)
             db.session.commit()
             return jsonify({
                 "message": "Contact created successfully.",
                 "contact": new_contact.to_dict()
             }), 201
-        except Exception as e:
+        except Exception as e:#Catch-all (for DB connection issues, etc.)
             db.session.rollback()
             print(f"Error creating contact: {e}")
             return jsonify({"error": "Could not create contact."}), 500
 
-    # If it's a GET request
+    # HTTP Get logic
     contacts = Contact.query.all()
-    contacts_list = [contact.to_dict() for contact in contacts]
-    return jsonify(contacts_list)
+    return jsonify([contact.to_dict() for contact in contacts])
 
 @app.route("/api/contacts/<int:id>", methods=["GET"])
 def get_contact(id):
