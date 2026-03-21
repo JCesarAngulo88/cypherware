@@ -274,7 +274,6 @@ if __name__ == "__main__":
     # Ensure tables are created if running script directly
     with app.app_context():
         print("Starting server...")
-        app.run(host="0.0.0.0", port=5001)
         db.create_all()
     # Port 5001 prevents macOS AirPlay conflict on 5000
     app.run(debug=True, host="127.0.0.1", port=5001)
