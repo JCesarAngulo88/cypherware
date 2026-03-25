@@ -9,18 +9,22 @@ from functools import wraps
 app = Flask(__name__)
 
 # --- Configuration ---
-# 1. Retrieve the Database URL from the environment
+# 1. Detect Environment
+is_pythonanywhere = 'PYTHONANYWHERE_DOMAIN' in os.environ
 raw_db_url = os.getenv('DATABASE_URL')
 
-# 2. Logic to handle SQLAlchemy 1.4+ requirement (postgresql:// vs postgres://)
-if raw_db_url:
+# 2. Set DATABASE_URL based on environment
+if is_pythonanywhere:
+    # Use SQLite on PythonAnywhere
+    # This creates cypherware.db in the same folder as server.py
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    DATABASE_URL = "sqlite:///" + os.path.join(basedir, "cypherware.db")
+elif raw_db_url:
+    # Handle SQLAlchemy 1.4+ requirement for external URLs
     if raw_db_url.startswith("postgres://"):
         DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
     else:
         DATABASE_URL = raw_db_url
-else:
-    # Local fallback for jcesar@localhost (No password usually needed for local socket)
-    DATABASE_URL = "postgresql://jcesar@localhost:5432/cypherware_db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
