@@ -55,6 +55,11 @@ class TestContact:
         Verifies endpoint: Get all contacts saved.
         """
         logger.info("\n\nCheck the endpoint: Get contact by ID...")
+
+        new_contact_payload = get_contact_payload({"user_name": "Julio Test"})
+        logger.info(f"\n\nActual Contact data: {new_contact_payload}\n")
+        response = authenticated_client.post(Endpoints.CONTACTS, json=new_contact_payload)
+        time.sleep(200)
         response = authenticated_client.get(Endpoints.CONTACTS_BY_ID + id_contact)
 
         assert response.status_code == 200, f"\nFail. Expected 200 but got {response.status_code}"
