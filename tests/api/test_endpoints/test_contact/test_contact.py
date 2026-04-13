@@ -64,7 +64,7 @@ class TestContact:
         response_json = response.json()
         logger.info(f"\nPass. Expected data: {response_json}")
 
-    @pytest.mark.debug
+    @pytest.mark.smoke
     def test_create_new_contact(self, authenticated_client):
         logger.info("Verify endpoint: Create new contact...")
         new_contact_payload = get_contact_payload({"user_name": "Alana_Test"})
@@ -72,17 +72,17 @@ class TestContact:
         response = authenticated_client.post(Endpoints.CONTACTS, json=new_contact_payload)
         data = response.json()
         logger.info(f"\nData response: {data}")
-        logger.info(f"\nContent response: {response.headers.get("Content-Type")}")
-        logger.info(f"\nContent response length: {response.headers.get("Content-Length")}")
+        logger.info(f"\nContent response {response.headers.get('Content-Type')}")
+        logger.info(f"\nContent response length: {response.headers.get('Content-Length')}")
         logger.info(f"\nSession Headers: {authenticated_client.session.headers}")
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
         if response.status_code != 201:
             logger.error(f"Validation Failed! Server says: {response.json().get('message')}")
         assert response.status_code == 201, f"\nFail. Expected 201 but got {response.status_code}"
         logger.info(f"\nPass. Expected code: 201. API Response: {response.status_code}")
 
-        self.verify_contact_in_db(new_contact_payload["user_name"])
+        self.verify_contact_in_db(new_contact_payload['user_name'])
 
         # from server import app, db, Contact  # Import your app and model
         # with app.app_context():
@@ -96,7 +96,7 @@ class TestContact:
 
     """ Negative Test Cases """
 
-    @pytest.mark.smoke
+    @pytest.mark.prio1
     def test_error_missing_fields(self, authenticated_client):
         """Verify 400 error when required fields are missing"""
         # Sending a payload missing 'service_type' and 'project_name'
@@ -115,7 +115,7 @@ class TestContact:
         assert "Missing required fields" == data["error"], f"\nFail. Expected 'Missing required fields' but got {data['error']}"
         logger.info(f"\nPass. Expected 'Missing required fields' but got {data['error']}")
 
-    @pytest.mark.smoke
+    @pytest.mark.prio1
     def test_error_invalid_email_format(self, authenticated_client):
         logger.info("\n\nVerify 422 error for logically invalid data (missing @)")
         bad_email_payload = {
@@ -134,7 +134,7 @@ class TestContact:
         logger.info(f"\nPass. Expected code: 422. API Response: {response.status_code}")
         assert response.json()["message"] == "Invalid email format", f"\nFail. Expected: Invalid email format. API Response: {response.json()["message"]}"
 
-    @pytest.mark.smoke
+    @pytest.mark.prio1
     def test_error_unsupported_media_type(self, authenticated_client):
         logger.info("\n\nVerify 415 error when sending plain text instead of JSON")
         headers = authenticated_client.session.headers.copy()
@@ -153,7 +153,7 @@ class TestContact:
         logger.info(f"\nPass. Expected code: 415. API Response: {response.status_code}")
         assert "Content-Type must be application/json" in response.json()["message"], f"\nFail. Expected message: Content-Type must be application/json.API Response {response.json()["message"]}"
 
-    @pytest.mark.smoke
+    @pytest.mark.prio1
     def test_error_unauthorized_access(self, api_client):
         logger.info("\n\nVerify Error code 401 when authenticated is skipped")
         # Using a fresh requests call without the authenticated session
