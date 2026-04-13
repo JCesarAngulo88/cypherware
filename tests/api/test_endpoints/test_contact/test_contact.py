@@ -132,7 +132,7 @@ class TestContact:
         logger.info(f"\nData: {data}")
         assert response.status_code == 422, f"\nFail. Expected code: 422. API Response: {response.status_code}"
         logger.info(f"\nPass. Expected code: 422. API Response: {response.status_code}")
-        assert response.json()["message"] == "Invalid email format", f"\nFail. Expected: Invalid email format. API Response: {response.json()["message"]}"
+        assert response.json()["message"] == "Invalid email format", f"\nFail. Expected: Invalid email format. API Response: {response.json()['message']}"
 
     @pytest.mark.prio1
     def test_error_unsupported_media_type(self, authenticated_client):
@@ -151,7 +151,7 @@ class TestContact:
         logger.info(f"\nData response: {data}")
         assert response.status_code == 415, f"Fail. Expected 415 but got {response.status_code}"
         logger.info(f"\nPass. Expected code: 415. API Response: {response.status_code}")
-        assert "Content-Type must be application/json" in response.json()["message"], f"\nFail. Expected message: Content-Type must be application/json.API Response {response.json()["message"]}"
+        assert "Content-Type must be application/json" in response.json()["message"], f"\nFail. Expected message: Content-Type must be application/json.API Response {response.json()['message']}"
 
     @pytest.mark.prio1
     def test_error_unauthorized_access(self, api_client):
