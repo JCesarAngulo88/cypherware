@@ -4,6 +4,8 @@ import time
 import logging
 logger = logging.getLogger(__name__)
 from tests.api.config.endpoints import Endpoints
+from tests.api.api_utils.data_factories import *
+from server import app, db, Contact
 
 class TestContact:
     """
@@ -46,7 +48,6 @@ class TestContact:
         assert response_time < .5, f"\nResponse time {response_time:.2f}s exceeded .5s"
         logger.info(f"\nPass. Expected time: T<500ms. API Response Time: {response_time}")
 
-
     @pytest.mark.smoke
     @pytest.mark.parametrize("id_contact", "1")
     def test_contact_get_contact_id(self, authenticated_client, id_contact):
@@ -66,41 +67,34 @@ class TestContact:
     @pytest.mark.debug
     def test_create_new_contact(self, authenticated_client):
         logger.info("Verify endpoint: Create new contact...")
-        new_contact_payload = {
-            "user_name": "Alaaaaaa",
-            "email_address": "newUsertest@cypherware.com",
-            "phone_number": "1234567890",
-            "service_type": "QA Services",
-            "project_name": "Validation Test",
-            "project_description": "Testing missing fields"
-        }
-
-        response = authenticated_client.post(Endpoints.CONTACTS, json=new_contact_payload, headers=authenticated_client.session.headers)
+        new_contact_payload = get_contact_payload({"user_name": "Alana_Test"})
+        logger.info(f"\n\nActual Contact data: {new_contact_payload}\n")
+        response = authenticated_client.post(Endpoints.CONTACTS, json=new_contact_payload)
         data = response.json()
         logger.info(f"\nData response: {data}")
         logger.info(f"\nContent response: {response.headers.get("Content-Type")}")
         logger.info(f"\nContent response length: {response.headers.get("Content-Length")}")
         logger.info(f"\nSession Headers: {authenticated_client.session.headers}")
-
+        import pdb
+        pdb.set_trace()
         if response.status_code != 201:
             logger.error(f"Validation Failed! Server says: {response.json().get('message')}")
-        assert response.status_code == 201, f"\nFail. Expected 400 but got {response.status_code}"
+        assert response.status_code == 201, f"\nFail. Expected 201 but got {response.status_code}"
         logger.info(f"\nPass. Expected code: 201. API Response: {response.status_code}")
 
-        from server import app, db, Contact  # Import your app and model
-        with app.app_context():
-            # Use a list comprehension to pull only the names
-            contact_names = [c.user_name for c in Contact.query.all()]
+        self.verify_contact_in_db(new_contact_payload["user_name"])
 
-            print("List of Contact Names:")
-            print(contact_names)
-            assert new_contact_payload["user_name"] in contact_names, f"\nFail. Expected {new_contact_payload["user_name"]} but got {contact_names}"
-            logger.info(f"\nPass. Expected name {new_contact_payload["user_name"]} DB Response: {contact_names}")
+        # from server import app, db, Contact  # Import your app and model
+        # with app.app_context():
+        #     # Use a list comprehension to pull only the names
+        #     contact_names = [c.user_name for c in Contact.query.all()]
 
+        #     print("List of Contact Names:")
+        #     print(contact_names)
+        #     assert new_contact_payload["user_name"] in contact_names, f"\nFail. Expected {new_contact_payload["user_name"]} but got {contact_names}"
+        #     logger.info(f"\nPass. Expected name {new_contact_payload["user_name"]} DB Response: {contact_names}")
 
-
-
-
+    """ Negative Test Cases """
 
     @pytest.mark.smoke
     def test_error_missing_fields(self, authenticated_client):
@@ -170,3 +164,19 @@ class TestContact:
         logger.info(f"\nPass. Expected code: 401. API Response: {response.status_code}")
         assert "Token is missing" in response.json().get("message", response.json().get("error")), f"Fail. Expected message: Token is missing. API Response: {response.json().get("message", response.json().get("error"))}"
         logger.info(f"Fail. Expected message: Token is missing. API Response: {response.json().get("message", response.json().get("error"))}")
+
+    def verify_contact_in_db(self, expected_name):
+        """
+        Helper method to verify a contact exists in the SQLite database.
+        """
+        logger.info(f"Verifying DB record for user: {expected_name}")
+        
+        with app.app_context():
+            # Query the DB for the specific name
+            contact = Contact.query.filter_by(user_name=expected_name).first()
+            
+            # Assertions
+            assert contact is not None, f"\nFail: Contact '{expected_name}' not found in database."
+            assert contact.user_name == expected_name
+            
+            logger.info(f"\nPass: Found contact '{contact.user_name}' in DB.")

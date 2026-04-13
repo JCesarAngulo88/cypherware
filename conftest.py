@@ -6,6 +6,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Create a logger instance for this module
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,7 @@ def initialize_database():
     Ensures that the database tables are created before any tests run.
     This is essential for the Cypherware app in CI/CD environments.
     """
+    logger.info("Setting Data base")
     try:
         from server import app, db
         # Debugging: Log the connection URI being used (masking sensitive parts)
@@ -46,6 +50,7 @@ def driver(request):
     Initializes the WebDriver. 
     Supports local (headed) and CI (headless) execution based on environment variables.
     """
+    logger.info("Setting Driver")
     chrome_options = Options()
     
     # Check if we are running in GitHub Actions (CI)
@@ -106,6 +111,7 @@ def setup_logger():
 @pytest.fixture
 def base_url():
     """Returns the URL of the running Flask server."""
+    logger.info("Setting Base URL")
     return os.getenv("BASE_URL", "http://127.0.0.1:5001")
 
 # --- API Fixtures
@@ -116,6 +122,7 @@ from tests.api.api_utils.api_client import APIClient
 @pytest.fixture(scope="session")
 def api_client() -> Generator[APIClient, None, None]:
     """Fixture to provide API client for all tests"""
+    logger.info("Setting API Client")
     client = APIClient()
     yield client
     # Cleanup if needed
@@ -127,6 +134,7 @@ def authenticated_client(api_client):
     Fixture to provide an authenticated API client for a specific test.
     It calls the login() method defined to attach the JWT token to the session headers.
     """
+    logger.info("Setting Authenticated Client")
     email = os.getenv("ADMIN_EMAIL")
     password = os.getenv("ADMIN_PASSWORD")
     # Fail fast if credentials are missing
@@ -139,6 +147,7 @@ def authenticated_client(api_client):
 @pytest.fixture(scope="function")
 def test_user_data() -> dict[str, Any]:
     """Fixture to provide test user data"""
+    logger.info("Setting Test User Data")
     return {
         "name": "Test User",
         "email": "test.user@example.com",
@@ -149,6 +158,7 @@ def test_user_data() -> dict[str, Any]:
 @pytest.fixture(scope="function")
 def cleanup_test_user(api_client: APIClient):
     """Fixture to clean up test users after tests"""
+    logger.info("Setting Clean Up")
     user_ids = []
     yield user_ids
 

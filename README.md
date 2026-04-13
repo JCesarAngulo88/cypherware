@@ -54,6 +54,7 @@ pip install -r requirements.txt
 UNIX/LINUX
 #run
 export FLASK_APP=server.py && flask run --debug
+export FLASK_APP=server.py && flask run --host=127.0.0.1 --port=5001 --debug
 
 WINDOWS
 $env:FLASK_APP = "server.py"

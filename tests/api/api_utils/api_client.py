@@ -34,6 +34,7 @@ class APIClient:
             if response.status_code == 200:
                 data = response.json()
                 self.token = data.get("token")
+                logger.info(f"\nToken Created: {self.token}\n")
                 # (GET, POST, DELETE) will automatically include this token.
                 self.session.headers.update({
                     "Authorization": f"Bearer {self.token}"
