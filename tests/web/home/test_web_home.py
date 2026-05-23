@@ -1,4 +1,5 @@
-#pytest -v -s -m debug tests/test_web_home.py
+#pytest -v -s -m debug tests/web/home/test_web_home.py
+#pytest -v -s -m smoke tests/api/test_endpoints/test_contact/test_contact.py
 import pytest
 import time
 from tests.web.home.test_data_home import *

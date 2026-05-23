@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gamefile.css') }}">
+<script defer src="{{ url_for('static', filename='js/gamefile.js') }}"></script>
+
+<h1>Rock Paper Scissors</h1>
+
+{% if not user %}
+
+<form method="POST">
+    <input type="text" name="username" placeholder="Enter your name" required>
+    <button type="submit">Login</button>
+</form>
+
+{% else %}
+
+<p>Welcome, {{ user }} 👋</p>
+<a href="{{ url_for('logout') }}">Logout</a>
+
+<br><br>
+
+<button id="startBtn">Start Game</button>
+
+<div id="gameArea" style="display:none;">
+
+    <h2>Choose your move:</h2>
+
+    <canvas id="gameCanvas" width="400" height="200"></canvas>
+
+    <br>
+
+    <button class="choice" data-choice="rock">🪨</button>
+    <button class="choice" data-choice="paper">📄</button>
+    <button class="choice" data-choice="scissors">✂️</button>
+
+    <h3 id="result"></h3>
+
+    <div class="scoreboard">
+        <p>You: <span id="playerScore">{{ player_score }}</span></p>
+        <p>Computer: <span id="computerScore">{{ computer_score }}</span></p>
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

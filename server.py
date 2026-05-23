@@ -1,89 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
+
+
+from app.models.contact_model import db, Contact
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+#from flask_sqlalchemy import SQLAlchemy
+#from sqlalchemy import text
 from datetime import datetime, timezone, timedelta
 from helpers.contact_validations import *
+from helpers.config_server_db import *
+from helpers.middleware import token_required
 import os
 import jwt
 from functools import wraps
 
 app = Flask(__name__)
+app.secret_key_games = "supersecretkeygames"  # required for sessions
 
-# --- Configuration ---
-# 1. Detect Environment
-is_pythonanywhere = 'PYTHONANYWHERE_DOMAIN' in os.environ
-raw_db_url = os.getenv('DATABASE_URL')
-
-# 2. Set DATABASE_URL based on environment
-if is_pythonanywhere:
-    # Use SQLite on PythonAnywhere
-    # This creates cypherware.db in the same folder as server.py
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    DATABASE_URL = "sqlite:///" + os.path.join(basedir, "cypherware.db")
-elif raw_db_url:
-    # Handle SQLAlchemy 1.4+ requirement for external URLs
-    if raw_db_url.startswith("postgres://"):
-        DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
-    else:
-        DATABASE_URL = raw_db_url
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-cipher-123')
-db = SQLAlchemy(app)
-
-# --- Database Models ---
-class Contact(db.Model):
-    """Model to store contact form submissions in PostgreSQL."""
-    __tablename__ = 'contact' # Matches the table name in your 'psql' output
-    id = db.Column(db.Integer, primary_key=True)
-    user_name = db.Column(db.String(30), nullable=False)
-    email_address = db.Column(db.String(30), nullable=False)
-    phone_number = db.Column(db.String(12), nullable=False)
-    service_type = db.Column(db.String(30), nullable=False)
-    project_name = db.Column(db.String(50), nullable=False)
-    project_description = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-
-    def __repr__(self):
-        return f"<Contact {self.user_name}>"
-    
-    # Method to serialize the Contact object into a dictionary for JSON
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "user_name": self.user_name,
-            "email_address": self.email_address,
-            "phone_number": self.phone_number,
-            "service_type": self.service_type,
-            "project_name": self.project_name,
-            "project_description": self.project_description,
-            "created_at": self.created_at.isoformat()
-        }
-
-# --- Auth Decorator ---
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        # Look for 'Authorization: Bearer <token>'
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            try:
-                token = auth_header.split(" ")[1]
-            except IndexError:
-                return jsonify({"error": "Token is missing"}), 401
-
-        if not token:
-            return jsonify({"error": "Token is missing"}), 401
-
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-            # You could add a user lookup here: current_user = User.query.get(data['user_id'])
-        except Exception as e:
-            return jsonify({"error": "Token is invalid or expired"}), 401
-
-        return f(*args, **kwargs)
-    return decorated
+db_config(app)
+db.init_app(app) # Magic Flask method
+check_db_connection(app, db)
 
 @app.route("/")
 def home():
@@ -96,6 +30,37 @@ def about():
 @app.route("/projects")
 def projects():
     return render_template("projects.html")
+
+@app.route("/game", methods=["GET", "POST"])
+def game():
+    if request.method == "POST":
+        username = request.form.get("username")
+        if username:
+            session["user"] = username
+            session["player_score"] = 0
+            session["computer_score"] = 0
+            return redirect(url_for("game"))
+
+    return render_template(
+        "gamefile.html",
+        user=session.get("user"),
+        player_score=session.get("player_score", 0),
+        computer_score=session.get("computer_score", 0),
+    )
+
+@app.route("/update_score", methods=["POST"])
+def update_score():
+    data = request.json
+
+    session["player_score"] = data.get("player_score", 0)
+    session["computer_score"] = data.get("computer_score", 0)
+
+    return jsonify({"status": "ok"})
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("game"))
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
