@@ -2,6 +2,8 @@ import pytest
 import logging
 import os
 import sys
+
+from config import *
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -65,7 +67,7 @@ def driver(request):
         service = Service()
     else:
         logger.info("Local environment: Enabling Headed Chrome.")
-        chrome_options.add_argument("--start-maximized")
+        chrome_options.binary_location = CHROME_BINARY_PATH
         try:
             from config import DRIVER_PATH
             service = Service(DRIVER_PATH)
@@ -74,6 +76,8 @@ def driver(request):
             service = Service()
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.set_window_size(1400, 800)
+    driver.set_window_position(-1500, 0)
 
     if request.cls is not None:
         request.cls.driver = driver

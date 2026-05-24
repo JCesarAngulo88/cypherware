@@ -1,3 +1,4 @@
+# pytest -v -s -m debug tests/web/contact/test_web_contact.py
 import pytest
 import logging
 import time
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 class TestContactPage:
 
     @pytest.mark.parametrize("contact_name", DATA_TEST_FULL_NAME_INPUT_FIELD)
-    @pytest.mark.debug
+    @pytest.mark.smoke
     def test_valid_name_input_field(self, driver, contact_name):
         logger.info("\nTest name: Input Valid Name")
         logger.info("\nTest ID: WC_1")
